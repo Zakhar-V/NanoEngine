@@ -118,6 +118,39 @@ typedef unsigned int uint;
 void Assert(const char* _type, const char* _func, const char* _file, int _line, const char* _desc, const char* _msg = nullptr, ...);
 
 //----------------------------------------------------------------------------//
+// Log 
+//----------------------------------------------------------------------------//
+
+#ifdef _DEBUG
+#	define USE_LOG 1
+#else
+#	define USE_LOG 1
+#endif
+
+//!
+void LogV(const char* _msg, va_list _args);
+//!
+void LogF(const char* _msg, ...);
+//!
+/*struct LogNode
+{
+LogNode(const char* _func);
+~LogNode(void);
+
+static int s_depth;
+};*/
+
+#if USE_LOG
+#	define LOG(msg, ...) LogF(msg, ##__VA_ARGS__)
+//#	define LOG_NODE(name) LogNode _logNode_(name)
+//#	define LOG_NODE_F(name, ...) LogNode _logNode_(String::Format(name, ##__VA_ARGS__))
+#else
+#	define LOG(msg, ...)
+//#	define LOG_NODE(name)
+//#	define LOG_NODE_F(name, ...)
+#endif
+
+//----------------------------------------------------------------------------//
 // NonCopyable
 //----------------------------------------------------------------------------//
 

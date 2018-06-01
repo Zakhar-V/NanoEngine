@@ -1,4 +1,70 @@
 #include "Base.hpp"
+#include <Windows.h> // remove it
+
+//----------------------------------------------------------------------------//
+// Assert
+//----------------------------------------------------------------------------//
+
+//----------------------------------------------------------------------------//
+void Assert(const char* _type, const char* _func, const char* _file, int _line, const char* _desc, const char* _msg, ...)
+{
+	LogF("%s(%d):", _file, _line);
+	LogF("%s: %s", _type, _desc);
+
+	char _info[512];
+	memset(_info, 0, sizeof(_info));
+	if (_msg)
+	{
+		va_list _args;
+		va_start(_args, _msg);
+
+		LogV(_msg, _args);
+		_vsnprintf(_info, sizeof(_info), _msg, _args);
+
+		va_end(_args);
+	}
+
+	char _text[1024];
+	_snprintf(_text, sizeof(_text), "%s\n%s\nat <%s>\n%s(%d)\n", _desc, _info, _func, _file, _line);
+
+	if (IsDebuggerPresent())
+	{
+		DebugBreak();
+	}
+	else
+	{
+		int _action = MessageBoxA(nullptr, _text, _type, MB_ABORTRETRYIGNORE | MB_ICONERROR | MB_TOPMOST | MB_SETFOREGROUND | MB_SYSTEMMODAL);
+		if (_action == IDABORT)
+		{
+			LogF("terminate process");
+			ExitProcess(-1);
+		}
+	}
+}
+//----------------------------------------------------------------------------//
+
+//----------------------------------------------------------------------------//
+// Log
+//----------------------------------------------------------------------------//
+
+//----------------------------------------------------------------------------//
+void LogV(const char* _msg, va_list _args)
+{
+	if (_msg)
+	{
+		vprintf(_msg, _args);
+		printf("\n");
+	}
+}
+//----------------------------------------------------------------------------//
+void LogF(const char* _msg, ...)
+{
+	va_list _args;
+	va_start(_args, _msg);
+	LogV(_msg, _args);
+	va_end(_args);
+}
+//----------------------------------------------------------------------------//
 
 //----------------------------------------------------------------------------//
 // Linked list 
