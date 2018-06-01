@@ -1,6 +1,126 @@
 #include "Base.hpp"
 
 //----------------------------------------------------------------------------//
+// Linked list 
+//----------------------------------------------------------------------------//
+
+//----------------------------------------------------------------------------//
+void** _LL_Field(void* _ptr, size_t _offset)
+{
+	return (void**)((uint8*)_ptr + _offset);
+}
+//----------------------------------------------------------------------------//
+void _LL_Link(void* _head, void* _this, void* _node)
+{
+	/*
+	next = head;
+	if(next) next->prev = this;
+	head = this;
+	*/
+
+	size_t _offset = (uint8*)_node - (uint8*)_this;
+	void** _next = 1 + (void**)_node;
+	*_next = *(void**)_head;
+	if (*_next)
+		_LL_Field(*_next, _offset)[0] = _this;
+	*(void**)_head = _this;
+}
+//----------------------------------------------------------------------------//
+void _LL_Unlink(void* _head, void* _this, void* _node)
+{
+	/*
+	if (m_next) m_next->m_prev = m_prev;
+	if (m_prev) m_prev->m_next = m_next;
+	else if(head == this) head = m_next;
+	*/
+
+	size_t _offset = (uint8*)_node - (uint8*)_this;
+	void** _prev = 0 + (void**)_node;
+	void** _next = 1 + (void**)_node;
+
+	if (*_next)
+		_LL_Field(*_next, _offset)[0] = *_prev;
+	if (*_prev)
+		_LL_Field(*_prev, _offset)[1] = *_next;
+	else if (*(void**)_head == _this)
+		*(void**)_head = *_next;
+
+	*_prev = nullptr;
+	*_next = nullptr;
+}
+//----------------------------------------------------------------------------//
+void _LL_LinkFirst(void* _first, void* _last, void* _this, void* _node)
+{
+	/*
+	next = first;
+	if(next) next->prev = this;
+	first = this;
+	if(!last) last = this;
+
+	*/
+
+	size_t _offset = (uint8*)_node - (uint8*)_this;
+	void** _prev = 0 + (void**)_node;
+	void** _next = 1 + (void**)_node;
+
+	*_next = *(void**)_first;
+	if (*_next)
+		_LL_Field(*_next, _offset)[0] = _this;
+	*(void**)_first = _this;
+	if (!*(void**)_last)
+		*(void**)_last = _this;
+}
+//----------------------------------------------------------------------------//
+void _LL_LinkLast(void* _first, void* _last, void* _this, void* _node)
+{
+	/*
+	prev = last;
+	if(prev) prev->next = this;
+	last = this;
+	if(!first) first = this;
+	*/
+
+	size_t _offset = (uint8*)_node - (uint8*)_this;
+	void** _prev = 0 + (void**)_node;
+	void** _next = 1 + (void**)_node;
+
+	*_prev = *(void**)_last;
+	if (*_prev)
+		_LL_Field(*_prev, _offset)[1] = _this;
+	*(void**)_last = _this;
+	if (!*(void**)_first)
+		*(void**)_first = _this;
+}
+//----------------------------------------------------------------------------//
+void _LL_Unlink(void* _first, void* _last, void* _this, void* _node)
+{
+	/*
+	if(m_next) m_next->m_prev = m_prev;
+	else last = m_prev;
+	if (m_prev) m_prev->m_next = m_next;
+	else first = m_next;
+	*/
+
+	size_t _offset = (uint8*)_node - (uint8*)_this;
+	void** _prev = 0 + (void**)_node;
+	void** _next = 1 + (void**)_node;
+
+	if (*_next)
+		_LL_Field(*_next, _offset)[0] = *_prev;
+	else
+		*(void**)_last = *_prev;
+
+	if (*_prev)
+		_LL_Field(*_prev, _offset)[1] = *_next;
+	else
+		*(void**)_first = *_next;
+
+	*_prev = nullptr;
+	*_next = nullptr;
+}
+//----------------------------------------------------------------------------//
+
+//----------------------------------------------------------------------------//
 // String
 //----------------------------------------------------------------------------//
 

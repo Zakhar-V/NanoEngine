@@ -1334,6 +1334,29 @@ template <class T> auto end(List<T>& _list)->decltype(_list.End()) { return _lis
 template <class T> auto end(const List<T>& _list)->decltype(_list.End()) { return _list.End(); }
 
 //----------------------------------------------------------------------------//
+// Linked list
+//----------------------------------------------------------------------------//
+
+/*#define LL_LINK(HEAD, NODE, PREV, NEXT) {\
+	NODE->NEXT = HEAD; \
+	if (HEAD) \
+		HEAD->PREV = NODE; \
+	HEAD = NODE; }
+
+#define LL_UNLINK(HEAD, NODE, PREV, NEXT) {\
+		if (NODE->PREV) \
+			NODE->PREV->NEXT = NODE->NEXT; \
+		else \
+		{ \
+			ASSERT(NODE == HEAD); \
+			HEAD = NODE->NEXT; \
+		} \
+		if (NODE->NEXT) \
+			NODE->NEXT->PREV = NODE->PREV; \
+		NODE->PREV = nullptr; \
+		NODE->NEXT = nullptr; }*/
+
+//----------------------------------------------------------------------------//
 // Pair
 //----------------------------------------------------------------------------//
 
