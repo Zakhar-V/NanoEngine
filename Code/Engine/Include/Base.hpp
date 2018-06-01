@@ -1890,6 +1890,93 @@ template <class T, class U> auto end(HashMap<T, U>& _map)->decltype(_map.End()) 
 template <class T, class U> auto end(const HashMap<T, U>& _map)->decltype(_map.End()) { return _map.End(); }
 
 //----------------------------------------------------------------------------//
+// Function
+//----------------------------------------------------------------------------//
+
+//!
+template <class F> void* FuncPtr(F _func) { union { F f; void* p; }_fp = { _func }; return _fp.p; }
+//!
+template <class F> F FuncCast(void* _func) { union { void* p; F f; }_fp = { _func }; return _fp.f; }
+
+// example:
+// auto func = Function<void(int)>(Func); // c-func
+// func = Function<void(int)>(&var, &MyClass::Func); // method
+// func(0);	// call
+
+//!
+template <class F> struct Function;
+//!
+template <class R, class... A> struct Function<R(A...)>
+{
+	// TODO: calling convention
+	typedef R(*Invoke)(void*, void*, A&&...);
+
+	typedef R(*Ptr)(A...);
+	typedef R(Type)(A...);
+
+	Invoke invoke;
+	void* func;
+	void* self;
+
+	//!
+	Function(void) : invoke(nullptr), func(nullptr), self(nullptr) { }
+	//!
+	Function(R(*_func)(A...)) : invoke(InvokeFunc), func(FuncPtr(_func)), self(nullptr) { }
+	//!
+	template <class C> Function(C* _self, R(C::*_func)(A...)) : invoke(InvokeMethod<C>), func(FuncPtr(_func)), self(_self) { ASSERT(_self != nullptr); }
+	//!
+	template <class C> Function(const C* _self, R(C::*_func)(A...) const) : invoke(InvokeConstMethod<C>), func(FuncPtr(_func)), self(const_cast<C*>(_self)) { ASSERT(_self != nullptr); }
+	//!
+	operator bool(void) const { return func != nullptr; }
+
+	//!
+	R operator () (A... _args) const
+	{
+		ASSERT(func != nullptr);
+		return invoke(self, func, Forward<A>(_args)...);
+	}
+
+	//!
+	static R InvokeFunc(void* _self, void* _func, A&&... _args)
+	{
+		typedef R(*Func)(A...);
+		return FuncCast<Func>(_func)(Forward<A>(_args)...);
+	}
+
+	//!
+	template <class C> static R InvokeMethod(void* _self, void* _func, A&&... _args)
+	{
+		ASSERT(_self != nullptr);
+		typedef R(C::*Func)(A...);
+		return (*((C*)_self).*FuncCast<Func>(_func))(Move(_args)...);
+	}
+
+	//!
+	template <class C> static R InvokeConstMethod(void* _self, void* _func, A&&... _args)
+	{
+		ASSERT(_self != nullptr);
+		typedef R(C::*Func)(A...) const;
+		return (*((const C*)_self).*FuncCast<Func>(_func))(Move(_args)...);
+	}
+};
+
+//!
+template <class R, class... A> Function<R(A...)> MakeFunction(R(*_func)(A...))
+{
+	return Function<R(A...)>(_func);
+}
+//!
+template <class C, class R, class... A> Function<R(A...)> MakeFunction(C* _self, R(C::*_func)(A...))
+{
+	return Function<R(A...)>(_self, _func);
+}
+//!
+template <class C, class R, class... A> Function<R(A...)> MakeFunction(const C* _self, R(C::*_func)(A...) const)
+{
+	return Function<R(A...)>(_self, _func);
+}
+
+//----------------------------------------------------------------------------//
 // String
 //----------------------------------------------------------------------------//
 
