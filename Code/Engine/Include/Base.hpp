@@ -2063,5 +2063,75 @@ inline auto end(String& _str)->decltype(_str.End()) { return _str.End(); }
 inline auto end(const String& _str)->decltype(_str.End()) { return _str.End(); }
 
 //----------------------------------------------------------------------------//
+// Tokenizer
+//----------------------------------------------------------------------------//
+
+//!
+struct Tokenizer
+{
+	//!
+	struct Number
+	{
+		bool isFloat = false;
+		union
+		{
+			int iValue = 0;
+			float fValue;
+		};
+	};
+
+	const char* s = nullptr;
+	const char* e = nullptr;
+
+	//!
+	operator char(void) const { return *s; }
+	//!
+	char operator * (void) const { return *s; }
+	//!
+	char operator [] (int _index) const { return s[_index]; }
+	//!
+	const char* operator ++ (void) { Advance(); return s; }
+	//!
+	const char* operator ++ (int) { const char* p = s; Advance(); return p; }
+
+	//!
+	Tokenizer operator += (int _rhs) { Advance(_rhs); return *this; }
+
+	//!
+	void Advance(int _num = 1);
+	//!
+	int SkipWhiteSpace(void);
+	//!
+	int SkipComments(void);
+	//!
+	void NextToken(void);
+
+	//!
+	bool IsNumber(void) const;
+	//!
+	bool ParseNumber(Number& _val);
+
+	//!
+	bool IsString(void) const;
+	//!
+	bool ParseString(String& _val);
+
+	//!
+	bool EoF(void) const { return !*s; }
+
+	//!
+	bool Cmp(const char* _rhs, int _num) const { return strncmp(s, _rhs, _num) == 0; }
+	//!
+	bool Cmpi(const char* _rhs, int _num) const { return strnicmp(s, _rhs, _num) == 0; }
+	//!
+	bool AnyOf(const char* _cset) const { return *s && strchr(_cset, *s); }
+
+	//!
+	bool RaiseError(const char* _error);
+	//!
+	static void GetErrorPos(const char* _start, const char* _pos, int& _line, int& _column);
+};
+
+//----------------------------------------------------------------------------//
 // 
 //----------------------------------------------------------------------------//

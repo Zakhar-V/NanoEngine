@@ -580,5 +580,251 @@ void String::Split(const char* _str, const char* _delimiters, Array<String>& _ds
 //----------------------------------------------------------------------------//
 
 //----------------------------------------------------------------------------//
+// Tokenizer
+//----------------------------------------------------------------------------//
+
+//----------------------------------------------------------------------------//
+void Tokenizer::Advance(int _num)
+{
+	while (_num-- && *s)
+		++s;
+}
+//----------------------------------------------------------------------------//
+int Tokenizer::SkipWhiteSpace(void)
+{
+	const char* _start = s;
+	while (AnyOf(" \t\n\r"))
+		Advance();
+	return s - _start;
+}
+//----------------------------------------------------------------------------//
+int Tokenizer::SkipComments(void)
+{
+	const char* _start = s;
+	if (s[0] == '/' && (s[1] == '/' || s[1] == '*')) // comment
+	{
+		if (s[1] == '/')
+		{
+			Advance(2);
+			while (!EoF() && !AnyOf("\n\r"))
+				Advance();
+		}
+		else
+		{
+			Advance(2);
+			while (!EoF())
+			{
+				if (Cmp("*/", 2))
+				{
+					Advance(2);
+					break;
+				}
+				if (EoF())
+					e = "EoF in multiline comment";
+				Advance();
+			}
+		}
+	}
+	return s - _start;
+}
+//----------------------------------------------------------------------------//
+void Tokenizer::NextToken(void)
+{
+	while ((SkipWhiteSpace() || SkipComments()) && !e);
+}
+//----------------------------------------------------------------------------//
+bool Tokenizer::IsNumber(void) const
+{
+	return AnyOf("0123456789+-.");
+}
+//----------------------------------------------------------------------------//
+bool Tokenizer::ParseNumber(Number& _val)
+{
+	if (!IsNumber())
+		return RaiseError("Expected numeric constant not found");
+
+	const char* _start = s;
+	if (s[0] == '-')
+		Advance();
+
+	int _readed = 0, _result = 0;
+	while (AnyOf("0123456789"))
+		Advance(), _readed++;
+
+	if (s[0] == '.')
+	{
+		_val.isFloat = true;
+
+		Advance();
+		_readed = 0;
+		while (AnyOf("0123456789"))
+			Advance(), _readed++;
+
+		if (!_readed)
+			return RaiseError("Wrong numeric constant");
+
+		if (AnyOf("eE"))
+		{
+			Advance();
+			if (!AnyOf("+-"))
+				return RaiseError("Wrong numeric constant");
+			Advance();
+
+			_readed = 0;
+			while (AnyOf("0123456789"))
+				Advance(), _readed++;
+
+			if (!_readed)
+				return RaiseError("Wrong numeric constant");
+
+			_result = sscanf(_start, "%e", &_val.fValue);
+		}
+		else
+		{
+			_result = sscanf(_start, "%f", &_val.fValue);
+		}
+	}
+	else if (!_readed)
+	{
+		return RaiseError("Wrong numeric constant");
+	}
+	else
+	{
+		_val.isFloat = false;
+		_result = sscanf(_start, "%d", &_val.iValue);
+	}
+
+	if (!_result)
+		return RaiseError("Wrong numeric constant");
+
+	return true;
+}
+//----------------------------------------------------------------------------//
+bool Tokenizer::IsString(void) const
+{
+	return *s == '"';
+}
+//----------------------------------------------------------------------------//
+bool Tokenizer::ParseString(String& _val)
+{
+	if (!IsString())
+		return RaiseError("Expected string constant not found");
+
+	Advance();
+	for (;;)
+	{
+		if (s[0] == '\\')
+		{
+			switch (s[1])
+			{
+			case '\\':
+				Advance(2);
+				_val += "\\";
+				break;
+			case '/':
+				Advance(2);
+				_val += "/";
+				break;
+			case 'b':
+				Advance(2);
+				_val += "\b";
+				break;
+			case 'f':
+				Advance(2);
+				_val += "\f";
+				break;
+			case 'n':
+				Advance(2);
+				_val += "\n";
+				break;
+			case 'r':
+				Advance(2);
+				_val += "\r";
+				break;
+			case 't':
+				Advance(2);
+				_val += "\t";
+				break;
+			case 'u':
+			{
+				Advance(2);
+				char _buff[5];
+				for (uint i = 0; i < 4; ++i)
+				{
+					if (!AnyOf("0123456789abcdefABCDEF"))
+						return RaiseError("Expected numeric literal");
+					_buff[i] = *s;
+					Advance();
+				}
+				_buff[4] = 0;
+				uint16 _char = 0;
+				sscanf(_buff, "%hx", &_char);
+
+				if (_char > 0xff)
+					return RaiseError("Unicode character not supported"); // TODO:
+
+				_val += (char)_char;
+
+			} break;
+
+			default:
+				return RaiseError("Unknown escape sequence");
+			}
+		}
+		else if (*s == '"')
+		{
+			Advance();
+			break;
+		}
+		else if (AnyOf("\n\r"))
+		{
+			return RaiseError("New line in string constant");
+		}
+		else
+		{
+			_val.Append(s, 1);
+			Advance();
+		}
+	}
+
+	return true;
+}
+//----------------------------------------------------------------------------//
+bool Tokenizer::RaiseError(const char* _error)
+{
+	e = _error;
+	return false;
+}
+//----------------------------------------------------------------------------//
+void Tokenizer::GetErrorPos(const char* _start, const char* _pos, int& _line, int& _column)
+{
+	// Windows \r\n
+	// Linux \n
+	// Macintosh(Mac OSX) \n
+	// Macintosh(old) \r
+
+	_line = 1;
+	_column = 1;
+	while (_start < _pos)
+	{
+		if (_start[0] == '\r')
+		{
+			if (_start[1] == '\n')
+				++_start;
+			++_line;
+			_column = 0;
+		}
+		else if (_start[0] == '\n')
+		{
+			++_line;
+			_column = 0;
+		}
+		++_start;
+		++_column;
+	}
+}
+//----------------------------------------------------------------------------//
+
+//----------------------------------------------------------------------------//
 // 
 //----------------------------------------------------------------------------//
