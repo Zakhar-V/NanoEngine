@@ -1337,7 +1337,7 @@ template <class T> auto end(const List<T>& _list)->decltype(_list.End()) { retur
 // Linked list
 //----------------------------------------------------------------------------//
 
-/*#define LL_LINK(HEAD, NODE, PREV, NEXT) {\
+#define LL_LINK(HEAD, NODE, PREV, NEXT) {\
 	NODE->NEXT = HEAD; \
 	if (HEAD) \
 		HEAD->PREV = NODE; \
@@ -1354,7 +1354,29 @@ template <class T> auto end(const List<T>& _list)->decltype(_list.End()) { retur
 		if (NODE->NEXT) \
 			NODE->NEXT->PREV = NODE->PREV; \
 		NODE->PREV = nullptr; \
-		NODE->NEXT = nullptr; }*/
+		NODE->NEXT = nullptr; }
+
+		//!
+void _LL_Link(void* _head, void* _this, void* _node);
+//!
+void _LL_Unlink(void* _head, void* _this, void* _node);
+//!
+void _LL_LinkFirst(void* _first, void* _last, void* _this, void* _node);
+//!
+void _LL_LinkLast(void* _first, void* _last, void* _this, void* _node);
+//!
+void _LL_Unlink(void* _first, void* _last, void* _this, void* _node);
+
+//!
+template <class T> void Link(T*& _head, T* _this, T*& _node) { _LL_Link(&_head, _this, &_node); }
+//!
+template <class T> void Unlink(T*& _head, T* _this, T*& _node) { _LL_Unlink(&_head, _this, &_node); }
+//!
+template <class T> void LinkFirst(T*& _first, T*& _last, T* _this, T*& _node) { _LL_LinkFirst(&_first, &_last, _this, &_node); }
+//!
+template <class T> void LinkLast(T*& _first, T*& _last, T* _this, T*& _node) { _LL_LinkLast(&_first, &_last, _this, &_node); }
+//!
+template <class T> void Unlink(T*& _first, T*& _last, T* _this, T*& _node) { _LL_Unlink(&_first, &_last, _this, &_node); }
 
 //----------------------------------------------------------------------------//
 // Pair
