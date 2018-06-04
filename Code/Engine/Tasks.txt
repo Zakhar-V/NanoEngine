@@ -10,12 +10,12 @@
 -перенести из других проектов необходимые классы и библиотеки
 -добавить сторонние библиотеки
 
--object
++object
 -system
 -window
 -input
 -io
--math
++math
 -ecs
 -resource
 -render
