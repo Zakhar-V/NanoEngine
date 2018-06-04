@@ -144,10 +144,12 @@
   <ItemGroup>
     <ClInclude Include="Engine.hpp" />
     <ClInclude Include="Include\Base.hpp" />
+    <ClInclude Include="Include\Core.hpp" />
     <ClInclude Include="temp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Base.cpp" />
+    <ClCompile Include="source\Core.cpp" />
     <ClCompile Include="Source\Engine.cpp" />
   </ItemGroup>
   <ItemGroup>

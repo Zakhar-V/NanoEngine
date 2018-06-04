@@ -10,3 +10,17 @@
 -перенести из других проектов необходимые классы и библиотеки
 -добавить сторонние библиотеки
 
+-object
+-system
+-window
+-input
+-io
+-math
+-ecs
+-resource
+-render
+-gui
+-sound
+-physics
+
+
