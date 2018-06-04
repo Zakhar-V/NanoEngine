@@ -4,11 +4,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{6CA68EBB-3199-4289-A326-E71E3BAB5FD5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3D5FDC22-5650-4D46-BF2E-AA511CCBF1E3} = {3D5FDC22-5650-4D46-BF2E-AA511CCBF1E3}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo", "Demo\Demo.vcxproj", "{38AA952C-4DC5-4215-A4B7-EC239728AA55}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6CA68EBB-3199-4289-A326-E71E3BAB5FD5} = {6CA68EBB-3199-4289-A326-E71E3BAB5FD5}
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{11A85A6A-48A9-4B0D-9093-3A88F6E19426}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL2", "External\SDL2\SDL2.vcxproj", "{3D5FDC22-5650-4D46-BF2E-AA511CCBF1E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,9 +41,20 @@ Global
 		{38AA952C-4DC5-4215-A4B7-EC239728AA55}.Release|x64.Build.0 = Release|x64
 		{38AA952C-4DC5-4215-A4B7-EC239728AA55}.Release|x86.ActiveCfg = Release|Win32
 		{38AA952C-4DC5-4215-A4B7-EC239728AA55}.Release|x86.Build.0 = Release|Win32
+		{3D5FDC22-5650-4D46-BF2E-AA511CCBF1E3}.Debug|x64.ActiveCfg = Debug|x64
+		{3D5FDC22-5650-4D46-BF2E-AA511CCBF1E3}.Debug|x64.Build.0 = Debug|x64
+		{3D5FDC22-5650-4D46-BF2E-AA511CCBF1E3}.Debug|x86.ActiveCfg = Debug|Win32
+		{3D5FDC22-5650-4D46-BF2E-AA511CCBF1E3}.Debug|x86.Build.0 = Debug|Win32
+		{3D5FDC22-5650-4D46-BF2E-AA511CCBF1E3}.Release|x64.ActiveCfg = Release|x64
+		{3D5FDC22-5650-4D46-BF2E-AA511CCBF1E3}.Release|x64.Build.0 = Release|x64
+		{3D5FDC22-5650-4D46-BF2E-AA511CCBF1E3}.Release|x86.ActiveCfg = Release|Win32
+		{3D5FDC22-5650-4D46-BF2E-AA511CCBF1E3}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3D5FDC22-5650-4D46-BF2E-AA511CCBF1E3} = {11A85A6A-48A9-4B0D-9093-3A88F6E19426}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E200C602-1F23-43BA-A4AA-AA8E489067FC}
