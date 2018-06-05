@@ -112,7 +112,7 @@ public:
 	SharedPtr& operator = (const T* _ptr)
 	{
 		if (_ptr)
-			_ptr->AddRef();
+			const_cast<T*>(_ptr)->AddRef();
 		if (m_ptr)
 			m_ptr->Release();
 		m_ptr = const_cast<T*>(_ptr);
@@ -299,16 +299,66 @@ public:
 
 
 	//!
-	/*virtual void SendEvent(int _type, void* _data = nullptr, Object* _sender = nullptr) { }
+	virtual bool SendEvent(int _type, void* _data = nullptr) { return false; }
 	//!
-	virtual void BroadcastEvent(int _type, void* _data = nullptr, Object* _sender = nullptr) { }
+	//virtual void BroadcastEvent(int _type, void* _data = nullptr, Object* _sender = nullptr) { }
 	//!
-	virtual bool OnEvent(int _type, void* _data, Object* _sender) { return false; }*/
+	virtual bool OnEvent(int _type, void* _data) { return false; }
 
 
 protected: // private?
 
 	static HashMap<uint, TypeInfo> s_types;
+};
+
+//!
+typedef SharedPtr<Object> ObjectPtr;
+
+//----------------------------------------------------------------------------//
+// Context
+//----------------------------------------------------------------------------//
+
+//!
+class Context : public Object
+{
+public:
+	RTTI("Context", Object);
+
+	//!
+	Context(void);
+	//!
+	~Context(void);
+
+	//!
+	virtual bool Startup(void);
+	//!
+	virtual void Shutdown(void);
+
+	//!
+	void AddSystem(Object* _system);
+
+	//!
+	bool SendEvent(int _type, void* _data = nullptr) override;
+	//!
+	virtual bool OnEvent(int _type, void* _data);
+
+
+protected:
+
+	List<ObjectPtr> m_systems;
+};
+
+//----------------------------------------------------------------------------//
+// 	SystemEvent
+//----------------------------------------------------------------------------//
+
+struct SystemEvent
+{
+	enum Type
+	{
+		Startup = String::ConstHash("SystemEvent::Startup"),
+		Shutdown = String::ConstHash("SystemEvent::Shutdown"),
+	};
 };
 
 //----------------------------------------------------------------------------//
