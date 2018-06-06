@@ -173,6 +173,7 @@
     <ClInclude Include="Engine.hpp" />
     <ClInclude Include="Include\Base.hpp" />
     <ClInclude Include="Include\Core.hpp" />
+    <ClInclude Include="Include\Device.hpp" />
     <ClInclude Include="Include\Math.hpp" />
     <ClInclude Include="Include\Time.hpp" />
     <ClInclude Include="temp.h" />
@@ -180,6 +181,7 @@
   <ItemGroup>
     <ClCompile Include="Source\Base.cpp" />
     <ClCompile Include="source\Core.cpp" />
+    <ClCompile Include="Source\Device.cpp" />
     <ClCompile Include="Source\Engine.cpp" />
     <ClCompile Include="Source\Math.cpp" />
     <ClCompile Include="Source\Time.cpp" />

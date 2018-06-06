@@ -18,6 +18,7 @@ bool Engine::Startup(void)
 	LOG("Startup...");
 
 	AddSystem(new Time);
+	AddSystem(new Device);
 	//AddSystem(new FileSystem);
 	//AddSystem(new RenderSystem);
 
