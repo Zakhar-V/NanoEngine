@@ -315,11 +315,23 @@ protected: // private?
 typedef SharedPtr<Object> ObjectPtr;
 
 //----------------------------------------------------------------------------//
-// Context
+// Module
 //----------------------------------------------------------------------------//
 
 //!
-class Context : public Object
+template <class T> class Module : public Object, public Singleton<T>
+{
+
+};
+
+//----------------------------------------------------------------------------//
+// Context
+//----------------------------------------------------------------------------//
+
+#define gContext Context::Instance
+
+//!
+class Context : public Module<Context>
 {
 public:
 	RTTI("Context", Object);
@@ -358,6 +370,11 @@ struct SystemEvent
 	{
 		Startup = String::ConstHash("SystemEvent::Startup"),
 		Shutdown = String::ConstHash("SystemEvent::Shutdown"),
+
+
+		BeginFrame = String::ConstHash("SystemEvent::BeginFrame"),
+		SDL = String::ConstHash("SystemEvent::SDL"), //!< internal sdl event
+		EndFrame = String::ConstHash("SystemEvent::EndFrame"),
 	};
 };
 

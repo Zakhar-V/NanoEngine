@@ -179,7 +179,14 @@ Context::~Context(void)
 //----------------------------------------------------------------------------//
 bool Context::Startup(void)
 {
-	SendEvent(SystemEvent::Startup);
+	bool _fail = false;
+	SendEvent(SystemEvent::Startup, &_fail);
+
+	if (_fail)
+	{
+		LOG("Unable to start up of engine");
+		return false;
+	}
 	return true;
 }
 //----------------------------------------------------------------------------//

@@ -8,6 +8,8 @@
 // Engine
 //----------------------------------------------------------------------------//
 
+#define gEngine Engine::Get<Engine>()
+
 //!
 class Engine : public Context
 {
@@ -23,6 +25,10 @@ public:
 	bool Startup(void) override;
 	//!
 	void Shutdown(void) override;
+
+
+	//!
+	void OneFrame(void);
 
 protected:
 };

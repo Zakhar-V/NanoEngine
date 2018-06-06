@@ -190,6 +190,8 @@ public:
 
 	//!
 	static T* Get(void) { return s_instance; }
+	//!
+	template <class X> static X* Get(void) { return static_cast<X*>(s_instance); }
 
 	static T* const& Instance;
 
