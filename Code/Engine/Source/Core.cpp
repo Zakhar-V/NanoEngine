@@ -192,7 +192,10 @@ bool Context::Startup(void)
 //----------------------------------------------------------------------------//
 void Context::Shutdown(void)
 {
-	SendEvent(SystemEvent::Shutdown);
+	for (auto i = m_systems.RBegin(); i != m_systems.End(); --i)
+	{
+		(*i)->OnEvent(SystemEvent::Shutdown, nullptr);
+	}
 }
 //----------------------------------------------------------------------------//
 void Context::AddSystem(Object* _system)
@@ -206,7 +209,7 @@ bool Context::SendEvent(int _type, void* _data)
 {
 	for (auto i : m_systems)
 	{
-		if (i->OnEvent(_type, _data))
+		if(i->OnEvent(_type, _data))
 			return true;
 	}
 	return false;

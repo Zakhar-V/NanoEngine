@@ -7,6 +7,8 @@
 //----------------------------------------------------------------------------//
 Engine::Engine(void)
 { 
+	AddSystem(new Time);
+	AddSystem(new Device);
 }
 //----------------------------------------------------------------------------//
 Engine::~Engine(void)
@@ -16,11 +18,6 @@ Engine::~Engine(void)
 bool Engine::Startup(void)
 {
 	LOG("Startup...");
-
-	AddSystem(new Time);
-	AddSystem(new Device);
-	//AddSystem(new FileSystem);
-	//AddSystem(new RenderSystem);
 
 	if (!Context::Startup())
 		return false;
