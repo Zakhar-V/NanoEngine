@@ -1388,6 +1388,9 @@ const Json::Node& Json::Container(void) const
 //----------------------------------------------------------------------------//
 bool Json::Parse(const char* _str, String* _error)
 {
+	if (!_str)
+		return true;
+
 	Tokenizer _stream;
 	_stream.s = _str;
 
