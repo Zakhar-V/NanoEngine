@@ -7,6 +7,7 @@
 //----------------------------------------------------------------------------//
 Engine::Engine(void)
 { 
+	AddSystem(new FileSystem);
 	AddSystem(new Time);
 	AddSystem(new Device);
 	AddSystem(new Graphics);

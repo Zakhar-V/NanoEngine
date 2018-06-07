@@ -4,6 +4,8 @@
 #include "Include/Core.hpp"
 #include "Include/Math.hpp"
 
+#include "Include/File.hpp"
+
 #include "Include/Time.hpp"
 #include "Include/Device.hpp"
 #include "Include/Graphics.hpp"
