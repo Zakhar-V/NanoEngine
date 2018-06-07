@@ -9,6 +9,7 @@ Engine::Engine(void)
 { 
 	AddSystem(new Time);
 	AddSystem(new Device);
+	AddSystem(new Graphics);
 }
 //----------------------------------------------------------------------------//
 Engine::~Engine(void)

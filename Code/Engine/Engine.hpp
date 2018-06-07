@@ -6,6 +6,7 @@
 
 #include "Include/Time.hpp"
 #include "Include/Device.hpp"
+#include "Include/Graphics.hpp"
 
 //----------------------------------------------------------------------------//
 // Engine
