@@ -1012,5 +1012,658 @@ void Tokenizer::GetErrorPos(const char* _start, const char* _pos, int& _line, in
 //----------------------------------------------------------------------------//
 
 //----------------------------------------------------------------------------//
+// Json
+//----------------------------------------------------------------------------//
+
+const Json Json::Null;
+const Json Json::EmptyArray(Json::Type::Array);
+const Json Json::EmptyObject(Json::Type::Object);
+
+//----------------------------------------------------------------------------//
+Json::Json(const Json& _other)
+{
+	SetType(_other.m_type);
+	if (IsString())
+		_String() = _other._String();
+	else if (IsNode())
+		_Node() = _other._Node();
+	else
+		m_int = _other.m_int;
+}
+//----------------------------------------------------------------------------//
+Json::Json(Json&& _temp)
+{
+	SetType(_temp.m_type);
+	if (IsString())
+		_String() = std::move(_temp._String());
+	else if (IsNode())
+		_Node() = std::move(_temp._Node());
+	else
+		m_int = _temp.m_int;
+}
+//----------------------------------------------------------------------------//
+Json::Json(bool _value)
+{
+	SetType(Type::Bool);
+	_Bool() = _value;
+}
+//----------------------------------------------------------------------------//
+Json::Json(int _value)
+{
+	SetType(Type::Int);
+	_Int() = _value;
+}
+//----------------------------------------------------------------------------//
+Json::Json(uint _value)
+{
+	SetType(Type::Int);
+	_Int() = _value;
+}
+//----------------------------------------------------------------------------//
+Json::Json(float _value)
+{
+	SetType(Type::Float);
+	_Float() = _value;
+}
+//----------------------------------------------------------------------------//
+Json::Json(const char* _value)
+{
+	SetType(Type::String);
+	_String() = _value;
+}
+//----------------------------------------------------------------------------//
+Json::Json(const String& _value)
+{
+	SetType(Type::String);
+	_String() = _value;
+}
+//----------------------------------------------------------------------------//
+Json::Json(String&& _value)
+{
+	SetType(Type::String);
+	_String() = std::move(_value);
+}
+//----------------------------------------------------------------------------//
+Json& Json::operator = (const Json& _rhs)
+{
+	SetType(_rhs.m_type);
+	if (IsString())
+		_String() = _rhs._String();
+	else if (IsNode())
+		_Node() = _rhs._Node();
+	else
+		m_int = _rhs.m_int;
+
+	return *this;
+}
+//----------------------------------------------------------------------------//
+Json& Json::operator = (Json&& _rhs)
+{
+	SetType(_rhs.m_type);
+	if (IsString())
+		_String() = std::move(_rhs._String());
+	else if (IsNode())
+		_Node() = std::move(_rhs._Node());
+	else
+		m_int = _rhs.m_int;
+	return *this;
+}
+//----------------------------------------------------------------------------//
+Json& Json::SetType(Type _type)
+{
+	if (m_type != _type)
+	{
+		switch (m_type)
+		{
+		case Type::String:
+			_String().~String();
+			break;
+		case Type::Array:
+		case Type::Object:
+			_Node().~Node();
+			break;
+		};
+
+		m_type = _type;
+
+		switch (m_type)
+		{
+		case Type::String:
+			new(&_String()) String();
+			break;
+		case Type::Array:
+		case Type::Object:
+			new(&_Node()) Node();
+			break;
+		default:
+			m_int = 0;
+			break;
+		};
+	}
+	/*else if (IsNode() && (_type == Type::Array || _type == Type::Object))
+	{
+		m_type = _type;
+	}*/
+
+	return *this;
+}
+//----------------------------------------------------------------------------//
+Json& Json::SetArray(InitializerList<Json> _value)
+{
+	Clear();
+	for (auto i : _value)
+		Push(i);
+	return *this;
+}
+//----------------------------------------------------------------------------//
+Json& Json::SetObject(InitializerList<KeyValue> _value)
+{
+	Clear();
+	for (auto i : _value)
+		Set(i.first, i.second);
+	return *this;
+}
+//----------------------------------------------------------------------------//
+bool Json::AsBool(void) const
+{
+	switch (m_type)
+	{
+	case Type::Null:
+	case Type::Bool:
+	case Type::Int:
+		return m_int != 0;
+	case Type::Float:
+		return m_flt != 0;
+	}
+	return false;
+}
+//----------------------------------------------------------------------------//
+int Json::AsInt(void) const
+{
+	switch (m_type)
+	{
+	case Type::Null:
+	case Type::Bool:
+	case Type::Int:
+		return m_int;
+	case Type::Float:
+		return (int)m_flt;
+	}
+	return 0;
+}
+//----------------------------------------------------------------------------//
+float Json::AsFloat(void) const
+{
+	switch (m_type)
+	{
+	case Type::Null:
+	case Type::Bool:
+	case Type::Int:
+		return (float)m_int;
+	case Type::Float:
+		return m_flt;
+	}
+	return 0;
+}
+//----------------------------------------------------------------------------//
+String Json::AsString(void) const
+{
+	switch (m_type)
+	{
+	case Type::Null:
+		return "null";
+	case Type::Bool:
+		return m_bool ? "true" : "false";
+	case Type::Int:
+		return String::Format("%d", m_int);
+	case Type::Float:
+		return String::Format("%f", m_flt);
+	case Type::String:
+		return _String();
+	}
+	return "";
+}
+//----------------------------------------------------------------------------//
+uint Json::Size(void) const
+{
+	switch (m_type)
+	{
+	case Type::Array:
+	case Type::Object:
+		return (uint)_Node().Size();
+	}
+	return 0;
+}
+//----------------------------------------------------------------------------//
+Json& Json::Clear(void)
+{
+	if (IsNode())
+		_Node().Clear();
+	return *this;
+}
+//----------------------------------------------------------------------------//
+Json& Json::Resize(uint _size)
+{
+	SetType(Type::Array);
+	_Node().Resize(_size);
+	return *this;
+}
+//----------------------------------------------------------------------------//
+Json& Json::Get(uint _index)
+{
+	SetType(Type::Array);
+	return _Node()[_index].second;
+}
+//----------------------------------------------------------------------------//
+const Json& Json::Get(uint _index) const
+{
+	return IsArray() ? _Node()[_index].second : Null;
+}
+//----------------------------------------------------------------------------//
+Json& Json::Insert(uint _pos, const Json& _value)
+{
+	SetType(Type::Array);
+	_Node().Emplace(_pos, "", _value);
+	return *this;
+}
+//----------------------------------------------------------------------------//
+Json& Json::Insert(uint _pos, Json&& _value)
+{
+	SetType(Type::Array);
+	_Node().Emplace(_pos, "", Move(_value));
+	return *this;
+}
+//----------------------------------------------------------------------------//
+Json& Json::Push(const Json& _value)
+{
+	SetType(Type::Array);
+	_Node().Push({ "", _value });
+	return *this;
+}
+//----------------------------------------------------------------------------//
+Json& Json::Push(Json&& _value)
+{
+	SetType(Type::Array);
+	_Node().Push({ "", Move(_value) });
+	return *this;
+}
+//----------------------------------------------------------------------------//
+Json& Json::Append(void)
+{
+	SetType(Type::Array);
+	_Node().Push({ "", Null });
+	return _Node().Back().second;
+}
+//----------------------------------------------------------------------------//
+Json& Json::Pop(void)
+{
+	if (IsArray())
+		_Node().Pop();
+	return *this;
+}
+//----------------------------------------------------------------------------//
+Json& Json::Erase(uint _start, uint _num)
+{
+	if (IsArray())
+		_Node().Erase(_start, _num);
+	return *this;
+}
+//----------------------------------------------------------------------------//
+Json& Json::GetOrAdd(const String& _key)
+{
+	SetType(Type::Object);
+
+	Json* _value = Find(_key);
+	if (_value)
+		return *_value;
+
+	_Node().Push({ _key, Null });
+	return _Node().Back().second;
+}
+//----------------------------------------------------------------------------//
+const Json& Json::Get(const String& _key) const
+{
+	const Json* _value = Find(_key);
+	return _value ? *_value : Null;
+}
+//----------------------------------------------------------------------------//
+Json* Json::Find(const String& _key)
+{
+	if (IsObject())
+	{
+		for (auto& i : _Node())
+		{
+			if (i.first == _key)
+				return &i.second;
+		}
+	}
+	return nullptr;
+}
+//----------------------------------------------------------------------------//
+const Json* Json::Find(const String& _key) const
+{
+	if (IsObject())
+	{
+		for (auto& i : _Node())
+		{
+			if (i.first == _key)
+				return &i.second;
+		}
+	}
+	return nullptr;
+}
+//----------------------------------------------------------------------------//
+Json& Json::Set(const String& _key, const Json& _value)
+{
+	GetOrAdd(_key) = _value;
+	return *this;
+}
+//----------------------------------------------------------------------------//
+bool Json::Erase(const String& _key)
+{
+	if (IsObject())
+	{
+		for (auto i = _Node().Begin(); i != _Node().End(); ++i)
+		{
+			if (i->first == _key)
+			{
+				_Node().Erase(i);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+//----------------------------------------------------------------------------//
+Json::Node& Json::Container(void)
+{
+	SetType(Type::Object);
+	return _Node();
+}
+//----------------------------------------------------------------------------//
+const Json::Node& Json::Container(void) const
+{
+	return IsObject() ? _Node() : EmptyObject._Node();
+}
+//----------------------------------------------------------------------------//
+bool Json::Parse(const char* _str, String* _error)
+{
+	Tokenizer _stream;
+	_stream.s = _str;
+
+	if (!_Parse(_stream))
+	{
+		if (_error)
+		{
+			int _l, _c;
+			Tokenizer::GetErrorPos(_str, _stream.s, _l, _c);
+			*_error = String::Format("(%d:%d) : JSON error : %s", _l, _c, _stream.e);
+		}
+
+		return false;
+	}
+
+	return true;
+}
+//----------------------------------------------------------------------------//
+String Json::Print(void) const
+{
+	String _str;
+	_Print(_str, 0);
+	return _str;
+}
+//----------------------------------------------------------------------------//
+/*bool Json::Load(Stream* _src)
+{
+	ASSERT(_src != nullptr);
+
+	Array<char> _data;
+	_data.resize(_src->Size());
+	_src->Read(_data.data(), (uint)_data.size());
+
+	String _err;
+	if (!Parse(_data.data(), &_err))
+	{
+		LOG("%s%s", _src->Name().c_str(), _err.c_str());
+		return false;
+	}
+	return true;
+}
+//----------------------------------------------------------------------------//
+void Json::Save(Stream* _dst)
+{
+	ASSERT(_dst != nullptr);
+
+	String _str = Print();
+	_dst->Write(_str.c_str(), (uint)_str.length());
+}*/
+//----------------------------------------------------------------------------//
+bool Json::_Parse(Tokenizer& _str)
+{
+	//http://www.json.org/json-ru.html
+
+	_str.NextToken();
+
+	if (_str.e)
+		return false;
+
+	if (_str.EoF()) // eof
+	{
+		SetNull();
+	}
+	else if (_str.IsNumber()) // int or float
+	{
+		Tokenizer::Number _val;
+		if (!_str.ParseNumber(_val))
+			return false;
+
+		if (_val.isFloat)
+			SetFloat(_val.fValue);
+		else
+			SetInt(_val.iValue);
+	}
+	else if (_str.IsString()) // string
+	{
+		SetType(Type::String);
+		if (!_str.ParseString(_String()))
+			return false;
+	}
+	else if (_str.Cmpi("true", 4)) // bool
+	{
+		_str += 4;
+		SetBool(true);
+	}
+	else if (_str.Cmpi("false", 5))	// bool
+	{
+		_str += 5;
+		SetBool(false);
+	}
+	else if (_str.Cmpi("null", 4)) // null
+	{
+		_str += 4;
+		SetNull();
+	}
+	else if (_str[0] == '[') // array
+	{
+		++_str;
+		SetType(Type::Array);
+		for (;;)
+		{
+			if (_str[0] == ']')
+			{
+				++_str;
+				break;
+			}
+
+			if (_str.EoF())
+				return _str.RaiseError("Unexpectd EoF");
+
+			if (!Append()._Parse(_str))
+				return false;
+
+			_str.NextToken();
+			if (_str[0] == ',') // divisor (not necessarily) 
+				++_str;
+		}
+	}
+	else if (_str[0] == '{') // object
+	{
+		++_str;
+		SetType(Type::Object);
+		for (;;)
+		{
+			_str.NextToken();
+
+			if (_str[0] == '}')
+			{
+				++_str;
+				break;
+			}
+
+			if (_str.EoF())
+				return _str.RaiseError("Unexpectd EoF");
+
+			_Node().Push({ "", Null });
+			KeyValue& _pair = _Node().Back();
+
+			if (!_str.ParseString(_pair.first))
+				return false;
+
+			_str.NextToken();
+			if (_str[0] == ':')
+				++_str;
+			else
+				return _str.RaiseError("Expected ':' not found");
+
+			_str.NextToken();
+			if (!_pair.second._Parse(_str))
+				return false;
+
+			_str.NextToken();
+			if (_str[0] == ',') // divisor (not necessarily) 
+				++_str;
+		}
+	}
+	else
+	{
+		return _str.RaiseError("Unknown symbol");
+	}
+
+	return true;
+}
+//----------------------------------------------------------------------------//
+void Json::_Print(String& _dst, int _depth) const
+{
+	switch (m_type)
+	{
+	case Type::Null:
+		_dst += "null";
+		break;
+	case Type::Bool:
+		_dst += _Bool() ? "true" : "false";
+		break;
+	case Type::Int:
+		_dst += String::Format("%d", _Int());
+		break;
+	case Type::Float:
+		_dst += String::Format("%f", _Float());
+		break;
+	case Type::String:
+	{
+		_PrintString(_dst, _String(), _depth);
+
+	} break;
+	case Type::Array:
+	{
+		bool _oneLine = true;
+		if (_Node().Size() < 5)
+		{
+			for (const auto& i : _Node())
+			{
+				if (i.second.IsNode())
+				{
+					_oneLine = false;
+					break;
+				}
+			}
+		}
+		else
+			_oneLine = false;
+
+		_dst += "[";
+
+		for (const auto& i : _Node())
+		{
+			if (!_oneLine)
+			{
+				_dst += '\n';
+				for (int i = 0; i <= _depth; ++i)
+					_dst += "\t";
+			}
+			i.second._Print(_dst, _depth + 1);
+
+			if (&i != &_Node().Back())
+			{
+				_dst += ",";
+				if (_oneLine)
+					_dst += " ";
+			}
+		}
+
+		if (!_oneLine)
+		{
+			_dst += "\n";
+			for (int i = 0; i < _depth; ++i)
+				_dst += "\t";
+		}
+		_dst += "]";
+
+	} break;
+	case Type::Object:
+	{
+		_dst += "{\n";
+
+		for (const auto& i : _Node())
+		{
+			for (int i = 0; i <= _depth; ++i)
+				_dst += "\t";
+
+			_PrintString(_dst, i.first, _depth + 1);
+
+			_dst += " : ";
+			i.second._Print(_dst, _depth + 1);
+
+			if (&i != &_Node().Back())
+				_dst += ",\n";
+		}
+
+		_dst += "\n";
+		for (int i = 0; i < _depth; ++i)
+			_dst += "\t";
+		_dst += "}";
+
+	} break;
+	}
+}
+//----------------------------------------------------------------------------//
+void Json::_PrintString(String& _dst, const String& _src, int _depth)
+{
+	_dst += "\"";
+	for (char s : _src)
+	{
+		if (s == '\n')
+			_dst += "\\n";
+		else if (s == '\r')
+			_dst += "\\r";
+		else if (s == '\\')
+			_dst += "\\\\";
+		else
+			_dst += s; // TODO:
+	}
+	_dst += "\"";
+}
+//----------------------------------------------------------------------------//
+
+//----------------------------------------------------------------------------//
 // 
 //----------------------------------------------------------------------------//
