@@ -139,13 +139,20 @@ protected:
 class FileSystem : public Module<FileSystem>
 {
 public:
+	RTTI("FileSystem", Object);
+
 	//!
 	FileSystem(void);
 	//!
 	~FileSystem(void);
 
 	//!
+	bool OnEvent(int _type, void* _data) override;
+
+	//!
 	void AddPath(const String& _path);
+	//!
+	bool HasAdditionalPaths(void) { return m_paths.Size() > 1; }
 	//!
 	bool FileExists(const String& _name, String* _path = nullptr);
 	//!
@@ -166,7 +173,18 @@ public:
 
 
 protected:
-	HashMap<uint, String> m_paths;
+	//!
+	void _PreloadEngineSettings(Json& _cfg);
+	//!
+	void _SaveEngineSettings(Json& _cfg);
+
+	struct Path
+	{
+		String src;
+		String fp;
+	};
+
+	HashMap<uint, Path> m_paths;
 };
 
 //----------------------------------------------------------------------------//

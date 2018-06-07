@@ -30,6 +30,14 @@ public:
 
 protected:
 	//!
+	void _PreloadEngineSettings(Json& _cfg);
+	//!
+	void _SaveEngineSettings(Json& _cfg);
+	//!
+	void _LoadUserSettings(Json& _cfg);
+	//!
+	void _SaveUserSettings(Json& _cfg);
+	//!
 	bool _Startup(void);
 	//!
 	void _Shutdown(void);
@@ -38,6 +46,7 @@ protected:
 	//!
 	void _EndFrame(void);
 
+	Json m_settings;
 	void* m_context = nullptr;
 	bool m_vsync = true;
 };

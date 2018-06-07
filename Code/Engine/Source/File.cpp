@@ -161,6 +161,21 @@ FileSystem::~FileSystem(void)
 {
 }
 //----------------------------------------------------------------------------//
+bool FileSystem::OnEvent(int _type, void* _data)
+{
+	switch (_type)
+	{
+	case SystemEvent::PreloadEngineSettings:
+		_PreloadEngineSettings(*reinterpret_cast<Json*>(_data));
+		break;
+
+	case SystemEvent::SaveEngineSettings:
+		_SaveEngineSettings(*reinterpret_cast<Json*>(_data));
+		break;
+	}
+	return false;
+}
+//----------------------------------------------------------------------------//
 void FileSystem::AddPath(const String& _path)
 {
 	String _fp;
@@ -183,11 +198,11 @@ void FileSystem::AddPath(const String& _path)
 	if (!PathUtils::IsDelimeter(_fp.Back()))
 		_fp += "/";
 
-	uint _hash = String::Hash(_fp);
+	uint _hash = String::IHash(_fp);
 	if (m_paths.Find(_hash) == m_paths.End())
 	{
 		LOG("Add Path \"%s\" as \"%s\"", _path.CStr(), _fp.CStr());
-		m_paths[_hash] = _fp;
+		m_paths[_hash] = { _path, _fp };
 	}
 }
 //----------------------------------------------------------------------------//
@@ -208,8 +223,8 @@ bool FileSystem::FileExists(const String& _name, String* _path)
 	{
 		for (const auto& i : m_paths)
 		{
-			ASSERT(PathUtils::IsFullPath(i.second));
-			if (FileExists(i.second + _name, _path))
+			ASSERT(PathUtils::IsFullPath(i.second.fp));
+			if (FileExists(i.second.fp + _name, _path))
 				return true;
 		}
 	}
@@ -285,6 +300,27 @@ Json FileSystem::LoadJson(const String& _path)
 void FileSystem::SaveJson(const String& _path, const Json& _src)
 {
 	SaveString(_path, _src.Print());
+}
+//----------------------------------------------------------------------------//
+void FileSystem::_PreloadEngineSettings(Json& _cfg)
+{
+	Json _paths = _cfg.Get("FileSystem");
+
+	for (uint i = 0; i < _paths.Size(); ++i)
+	{
+		AddPath(_paths[i]);
+	}
+}
+//----------------------------------------------------------------------------//
+void FileSystem::_SaveEngineSettings(Json& _cfg)
+{
+	Json _paths;
+	for (const auto& i : m_paths)
+	{
+		if(i.second.src.NonEmpty())
+			_paths.Push(i.second.src);
+	}
+	_cfg["FileSystem"] = _paths;
 }
 //----------------------------------------------------------------------------//
 

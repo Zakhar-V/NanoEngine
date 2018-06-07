@@ -22,6 +22,22 @@ bool Graphics::OnEvent(int _type, void* _data)
 {
 	switch (_type)
 	{
+	case SystemEvent::PreloadEngineSettings:
+		_PreloadEngineSettings(*reinterpret_cast<Json*>(_data));
+		break;
+
+	case SystemEvent::SaveEngineSettings:
+		_SaveEngineSettings(*reinterpret_cast<Json*>(_data));
+		break;
+
+	case SystemEvent::LoadUserSettings:
+		_LoadUserSettings(*reinterpret_cast<Json*>(_data));
+		break;
+
+	case SystemEvent::SaveUserSettings:
+		_SaveUserSettings(*reinterpret_cast<Json*>(_data));
+		break;
+
 	case SystemEvent::Startup:
 		if (!_Startup())
 		{
@@ -43,6 +59,33 @@ bool Graphics::OnEvent(int _type, void* _data)
 		break;
 	}
 	return false;
+}
+//----------------------------------------------------------------------------//
+void Graphics::_PreloadEngineSettings(Json& _cfg)
+{
+	m_settings = _cfg.Get("Graphics");
+}
+//----------------------------------------------------------------------------//
+void Graphics::_SaveEngineSettings(Json& _cfg)
+{
+	//
+	m_settings["CoreProfile"] = true;
+	m_settings["ForwardCompatible"] = false;
+	m_settings["DebugContext"] = false;
+
+	_cfg["Graphics"] = m_settings;
+}
+//----------------------------------------------------------------------------//
+void Graphics::_LoadUserSettings(Json& _cfg)
+{
+	const Json& _src = _cfg.Get("Graphics");
+	m_vsync = _src["VSync"];
+}
+//----------------------------------------------------------------------------//
+void Graphics::_SaveUserSettings(Json& _cfg)
+{
+	Json& _dst = _cfg["Graphics"];
+	_dst["VSync"] = m_vsync;
 }
 //----------------------------------------------------------------------------//
 bool Graphics::_Startup(void)

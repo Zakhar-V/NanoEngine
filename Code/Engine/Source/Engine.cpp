@@ -19,16 +19,40 @@ Engine::~Engine(void)
 //----------------------------------------------------------------------------//
 bool Engine::Startup(void)
 {
+	LOG("Preload engine settings");
+	{
+		Json _settings = gFileSystem->LoadJson("EngineSettings.json");
+		SendEvent(SystemEvent::PreloadEngineSettings, &_settings);
+	}
+
 	LOG("Startup...");
 
 	if (!Context::Startup())
 		return false;
+
+	LOG("Load user settings");
+	{
+		Json _settings = gFileSystem->LoadJson("UserSettings.json");
+		SendEvent(SystemEvent::LoadUserSettings, &_settings);
+	}
 
 	return true;
 }
 //----------------------------------------------------------------------------//
 void Engine::Shutdown(void)
 {
+	LOG("Flush settings");
+	{
+		Json _settings;
+		SendEvent(SystemEvent::SaveEngineSettings, &_settings);
+		gFileSystem->SaveJson("EngineSettings.json", _settings);
+	}
+	{
+		Json _settings;
+		SendEvent(SystemEvent::SaveUserSettings, &_settings);
+		gFileSystem->SaveJson("UserSettings.json", _settings);
+	}
+
 	LOG("Shutdown...");
 	Context::Shutdown();
 }

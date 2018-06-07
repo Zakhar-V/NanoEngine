@@ -31,6 +31,22 @@ bool Device::OnEvent(int _type, void* _data)
 {
 	switch (_type)
 	{
+	case SystemEvent::PreloadEngineSettings:
+		_PreloadEngineSettings(*reinterpret_cast<Json*>(_data));
+		break;
+
+	case SystemEvent::SaveEngineSettings:
+		_SaveEngineSettings(*reinterpret_cast<Json*>(_data));
+		break;
+
+	case SystemEvent::LoadUserSettings:
+		_LoadUserSettings(*reinterpret_cast<Json*>(_data));
+		break;
+
+	case SystemEvent::SaveUserSettings:
+		_SaveUserSettings(*reinterpret_cast<Json*>(_data));
+		break;
+
 	case SystemEvent::Startup:
 		if (!_Startup())
 		{
@@ -56,6 +72,29 @@ bool Device::OnEvent(int _type, void* _data)
 		break;
 	}
 	return false;
+}
+//----------------------------------------------------------------------------//
+void Device::_PreloadEngineSettings(Json& _cfg)
+{
+	m_settings = _cfg.Get("Device");
+}
+//----------------------------------------------------------------------------//
+void Device::_SaveEngineSettings(Json& _cfg)
+{
+	//
+	_cfg["Device"] = m_settings;
+}
+//----------------------------------------------------------------------------//
+void Device::_LoadUserSettings(Json& _cfg)
+{
+	const Json& _src = _cfg.Get("Device");
+	m_fullscreen = _src["Fullscreen"];
+}
+//----------------------------------------------------------------------------//
+void Device::_SaveUserSettings(Json& _cfg)
+{
+	Json& _dst = _cfg["Device"];
+	_dst["Fullscreen"] = m_fullscreen;
 }
 //----------------------------------------------------------------------------//
 bool Device::_Startup(void)

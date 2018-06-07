@@ -56,6 +56,14 @@ public:
 
 protected:
 	//!
+	void _PreloadEngineSettings(Json& _cfg);
+	//!
+	void _SaveEngineSettings(Json& _cfg);
+	//!
+	void _LoadUserSettings(Json& _cfg);
+	//!
+	void _SaveUserSettings(Json& _cfg);
+	//!
 	bool _Startup(void);
 	//!
 	void _Shutdown(void);
@@ -66,11 +74,15 @@ protected:
 	//!
 	void _OnSDLEvent(SDL_Event* _event);
 
+	Json m_settings;
+
 	SDL_Window* m_window = nullptr;
 	IntVector2 m_size = { 0, 0 };
 
 	bool m_opened = false;
 	bool m_userRequireExit = false;
+
+	bool m_fullscreen = false;
 };
 
 //----------------------------------------------------------------------------//

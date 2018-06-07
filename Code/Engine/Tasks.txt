@@ -12,9 +12,9 @@
 
 +object
 +system
--window
++window
 -input
--io
++io
 +math
 -ecs
 -resource
@@ -22,5 +22,6 @@
 -gui
 -sound
 -physics
+-graphics
 
 

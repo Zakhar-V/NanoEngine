@@ -371,6 +371,11 @@ struct SystemEvent
 		Startup = String::ConstHash("SystemEvent::Startup"),
 		Shutdown = String::ConstHash("SystemEvent::Shutdown"),
 
+		PreloadEngineSettings = String::ConstHash("SystemEvent::PreloadEngineSettings"),
+		SaveEngineSettings = String::ConstHash("SystemEvent::SaveEngineSettings"),
+
+		LoadUserSettings = String::ConstHash("SystemEvent::LoadUserSettings"),
+		SaveUserSettings = String::ConstHash("SystemEvent::SaveUserSettings"),
 
 		BeginFrame = String::ConstHash("SystemEvent::BeginFrame"),
 		SDL = String::ConstHash("SystemEvent::SDL"), //!< internal sdl event
