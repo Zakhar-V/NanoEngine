@@ -2069,6 +2069,8 @@ public:
 	char& At(uint _index) { ASSERT(_index < m_length); return m_data[_index]; }
 	//!
 	char At(uint _index) const { ASSERT(_index < m_length); return m_data[_index]; }
+	//!
+	char Back(void) const { return m_length ? m_data[m_length - 1] : 0; }
 
 	//!
 	operator const char* (void) const { return m_data; }
