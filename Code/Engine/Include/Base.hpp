@@ -1190,6 +1190,10 @@ public:
 	Iterator End(void) { return Iterator(static_cast<Node*>(&m_tail)); }
 	//!
 	ConstIterator End(void) const { return ConstIterator(static_cast<const Node*>(&m_tail)); }
+	//!
+	Iterator RBegin(void) { return Iterator(static_cast<Node*>(m_tail.m_prev)); }
+	//!
+	ConstIterator RBegin(void) const { return ConstIterator(static_cast<const Node*>(m_tail.m_prev)); }
 
 
 	//!
